@@ -6,7 +6,12 @@ calculator.
 This works by providing an implementation of `ApplicationFramework` (the Delta Pico firmware's HAL
 trait), which draws to a window backed by `minifb` and translates keystrokes into keypad buttons.
 
-![A screenshot of the simulator running on macOS, showing the Delta Pico's main menu screen.](img/screenshot.png)
+<p align="center">
+    <img
+        src="img/screenshot.png"
+        alt="A screenshot of the simulator running on macOS, showing the Delta Pico's main menu screen."
+        height="400">
+</p>
 
 ## Button Mapping
 
