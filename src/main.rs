@@ -55,7 +55,7 @@ impl DisplayInterface for FrameworkImpl {
 
     fn draw_display_sprite(&mut self, sprite: &Sprite) {
         let buffer = sprite.data.iter().map(|c| RGB332_TO_RGBA888_LOOKUP_TABLE[c.0 as usize]).collect::<Vec<_>>();
-        self.window.update_with_buffer(&buffer, 240, 320);
+        self.window.update_with_buffer(&buffer, 240, 320).unwrap();
 
         if !self.window.is_open() {
             exit(0);
