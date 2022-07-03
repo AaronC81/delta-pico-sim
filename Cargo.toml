@@ -6,5 +6,8 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+# Last version of clap which doesn't use `once-cell` - future versions conflict with `minifb`'s
+# `once-cell` version requirements
+clap = { version = "3.2.2", features = ["derive"] }
 delta-pico-rust = { path = "../delta-pico/rust", default-features = false }
 minifb = "0.22.0"

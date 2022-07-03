@@ -1,7 +1,8 @@
 use std::{process::exit, time::SystemTime};
 
-use delta_pico_rust::{interface::{ApplicationFramework, DisplayInterface, Colour, ButtonsInterface, ButtonEvent, StorageInterface, ButtonInput}, graphics::Sprite, delta_pico_main};
-use minifb::{Window, WindowOptions, Scale, InputCallback, Key, KeyRepeat};
+use delta_pico_rust::{interface::{ApplicationFramework, DisplayInterface, ButtonsInterface, ButtonEvent, StorageInterface, ButtonInput}, graphics::Sprite, delta_pico_main};
+use minifb::{Window, WindowOptions, Scale, Key, KeyRepeat};
+use clap::Parser;
 
 const STORAGE_SIZE: usize = 1000000;
 
@@ -9,6 +10,7 @@ struct FrameworkImpl {
     window: Window,
     start_time: SystemTime,
     storage: [u8; STORAGE_SIZE],
+    should_run_tests: bool,
 }
 
 impl ApplicationFramework for FrameworkImpl {
@@ -40,6 +42,10 @@ impl ApplicationFramework for FrameworkImpl {
     
     fn debug(&self, message: &str) {
         println!("{}", message)
+    }
+
+    fn should_run_tests(&mut self) -> bool {
+        self.should_run_tests
     }
 }
 
@@ -166,8 +172,16 @@ impl StorageInterface for FrameworkImpl {
     fn release_priority(&mut self) {}
 }
 
+#[derive(Parser)]
+struct Cli {
+    #[clap(short, long, action)]
+    test: bool,
+}
+
 fn main() {
-    let mut framework = FrameworkImpl {
+    let args = Cli::parse();
+
+    let framework = FrameworkImpl {
         window: Window::new(
             "Delta Pico",
             240,
@@ -180,6 +194,7 @@ fn main() {
         ).unwrap(),
         start_time: SystemTime::now(),
         storage: [0; STORAGE_SIZE],
+        should_run_tests: args.test,
     };
 
     delta_pico_main(framework);
