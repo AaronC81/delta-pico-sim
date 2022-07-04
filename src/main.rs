@@ -103,7 +103,7 @@ const RGB332_TO_RGBA888_LOOKUP_TABLE: [u32; 256] = [
     0xffdb00, 0xffdb52, 0xffdbad, 0xffdbff, 0xffff00, 0xffff52, 0xffffad, 0xffffff, 
 ];
 
-const BUTTON_MAPPING: [(bool, Key, ButtonInput); 26] = [
+const BUTTON_MAPPING: [(bool, Key, ButtonInput); 27] = [
     (false, Key::Left, ButtonInput::MoveLeft),
     (false, Key::Right, ButtonInput::MoveRight),
     (false, Key::Up, ButtonInput::MoveUp),
@@ -133,6 +133,7 @@ const BUTTON_MAPPING: [(bool, Key, ButtonInput); 26] = [
     (true,  Key::Key8, ButtonInput::Multiply),
     (true,  Key::Key6, ButtonInput::Power),
     (false, Key::Backspace, ButtonInput::Delete),
+    (false, Key::Period, ButtonInput::Point),
 ];
 
 impl ButtonsInterface for FrameworkImpl {
