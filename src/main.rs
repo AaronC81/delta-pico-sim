@@ -47,6 +47,11 @@ impl ApplicationFramework for FrameworkImpl {
     fn should_run_tests(&mut self) -> bool {
         self.should_run_tests
     }
+
+    fn tests_success_hook(&mut self) {
+        println!("Tests passed!");
+        exit(0);
+    }
 }
 
 impl DisplayInterface for FrameworkImpl {
