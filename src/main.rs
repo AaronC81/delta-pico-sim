@@ -1,4 +1,6 @@
-use std::{process::exit, time::SystemTime};
+#![feature(fs_try_exists)]
+
+use std::{process::exit, time::SystemTime, io, fs};
 
 use delta_pico_rust::{interface::{ApplicationFramework, DisplayInterface, ButtonsInterface, ButtonEvent, StorageInterface, ButtonInput}, graphics::Sprite, delta_pico_main};
 use minifb::{Window, WindowOptions, Scale, Key, KeyRepeat};
@@ -183,12 +185,15 @@ impl FrameworkImpl {
     }
 }
 
+const STORAGE_FILE: &'static str = "delta-pico-storage.bin";
+
 impl StorageInterface for FrameworkImpl {
     fn is_connected(&mut self) -> bool { true }
     fn is_busy(&mut self) -> bool { false }
 
     fn write(&mut self, address: u16, bytes: &[u8]) -> Option<()> {
         self.storage[(address as usize)..(address as usize + bytes.len())].copy_from_slice(bytes);
+        std::fs::write(STORAGE_FILE, &self.storage).ok()?;
         Some(())
     }
 
@@ -210,10 +215,10 @@ struct Cli {
     fuzz: bool,
 }
 
-fn main() {
+fn main() -> io::Result<()> {
     let args = Cli::parse();
 
-    let framework = FrameworkImpl {
+    let mut framework = FrameworkImpl {
         window: Window::new(
             "Delta Pico",
             240,
@@ -227,10 +232,13 @@ fn main() {
         start_time: SystemTime::now(),
         storage: [0; STORAGE_SIZE],
         should_run_tests: args.test,
-        
+
         should_fuzz: args.fuzz,
         fuzzer_first_input: true,
     };
+    if fs::try_exists(STORAGE_FILE)? && !(args.fuzz || args.test) {
+        framework.storage.copy_from_slice(&fs::read(STORAGE_FILE)?[..]);
+    }
 
     delta_pico_main(framework);
 

@@ -39,7 +39,6 @@ See the `BUTTON_MAPPING` constant in the source for a full list.
 
 Most features work fine, with these (known) exceptions:
 
-- Storage does not persist between re-runs of the simulator
 - The simulator doesn't have a bootloader
 - Colours don't show up exactly the same on the simulator - what looks grey on the real thing shows
   up as a dark green on the simulator
