@@ -3,6 +3,7 @@ use std::{process::exit, time::SystemTime};
 use delta_pico_rust::{interface::{ApplicationFramework, DisplayInterface, ButtonsInterface, ButtonEvent, StorageInterface, ButtonInput}, graphics::Sprite, delta_pico_main};
 use minifb::{Window, WindowOptions, Scale, Key, KeyRepeat};
 use clap::Parser;
+use rand::prelude::SliceRandom;
 
 const STORAGE_SIZE: usize = 1000000;
 
@@ -11,6 +12,8 @@ struct FrameworkImpl {
     start_time: SystemTime,
     storage: [u8; STORAGE_SIZE],
     should_run_tests: bool,
+    should_fuzz: bool,
+    fuzzer_first_input: bool,
 }
 
 impl ApplicationFramework for FrameworkImpl {
@@ -138,6 +141,8 @@ const BUTTON_MAPPING: [(bool, Key, ButtonInput); 27] = [
 
 impl ButtonsInterface for FrameworkImpl {
     fn wait_event(&mut self) -> ButtonEvent {
+        if self.should_fuzz { return self.fuzz_input() }
+
         loop {
             for (shifted, key, input) in BUTTON_MAPPING {
                 let pressed_without_modifier = self.window.is_key_pressed(key, KeyRepeat::No);
@@ -157,6 +162,24 @@ impl ButtonsInterface for FrameworkImpl {
 
     fn poll_event(&mut self) -> Option<ButtonEvent> {
         None
+    }
+}
+
+impl FrameworkImpl {
+    fn fuzz_input(&mut self) -> ButtonEvent {
+        if self.fuzzer_first_input {
+            self.fuzzer_first_input = false;
+            return ButtonEvent::Press(ButtonInput::Exe)
+        }
+
+        loop {
+            // Pick a random item, except MENU
+            let (_, _, button) = BUTTON_MAPPING.choose(&mut rand::thread_rng()).unwrap();
+
+            if *button != ButtonInput::Menu {
+                return ButtonEvent::Press(*button)
+            }
+        }
     }
 }
 
@@ -182,6 +205,9 @@ impl StorageInterface for FrameworkImpl {
 struct Cli {
     #[clap(short, long, action)]
     test: bool,
+
+    #[clap(short, long, action, conflicts_with("test"))]
+    fuzz: bool,
 }
 
 fn main() {
@@ -201,6 +227,9 @@ fn main() {
         start_time: SystemTime::now(),
         storage: [0; STORAGE_SIZE],
         should_run_tests: args.test,
+        
+        should_fuzz: args.fuzz,
+        fuzzer_first_input: true,
     };
 
     delta_pico_main(framework);
